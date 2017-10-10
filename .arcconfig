@@ -1,5 +1,5 @@
 {
-  "project.name": "project athena",
+  "project.name": "ansible nginx",
   "phabricator.uri": "https://p.cermati.com",
   "repository.callsign": "AN"
 }
