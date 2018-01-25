@@ -53,13 +53,15 @@ http {
   tcp_nodelay on;
 
 {% if nginx_use_upstream is defined and nginx_use_upstream == 'yes' %}
-  upstream {{ nginx_upstream_name }} {
-    {{ nginx_upstream_servers }}
+  {% for upstream_config in nginx_upstreams %}
+    upstream {{ upstream_config['name'] }} {
+      {{ upstream_config['servers'] }}
 
-    {% for k,v in nginx_upstream_options.iteritems() %}
-      {{ k }} {{ v }};
-    {% endfor %}
-  }
+      {% for k,v in upstream_config['options'].iteritems() %}
+        {{ k }} {{ v }};
+      {% endfor %}
+    }
+  {% endfor %}
 {% endif %}
 
 {% if nginx_keepalive == 'on' %}
