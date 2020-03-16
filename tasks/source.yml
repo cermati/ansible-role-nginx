@@ -64,3 +64,11 @@
   service:
     name: nginx
     enabled: yes
+  # we will manage nginx from supervisor, so don't start nginx using systemctl / service or it will conflict
+  when: not nginx_daemon_disable
+
+- name: Nginx | Disable Nginx as a service
+  service:
+    name: nginx
+    enabled: no
+  when: nginx_daemon_disable

@@ -3,8 +3,11 @@
 - name: restart nginx
   service: name=nginx state=restarted
   become: yes
-  when: not nginx_first_start.changed
+  # we will manage nginx from supervisor, so don't start nginx using systemctl / service or it will conflict
+  when: not nginx_first_start.changed and not nginx_daemon_disable
 
 - name: reload nginx
   service: name=nginx state=reloaded
   become: yes
+  # we will manage nginx from supervisor, so don't start nginx using systemctl / service or it will conflict
+  when: not nginx_daemon_disable

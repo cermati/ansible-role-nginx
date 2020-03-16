@@ -61,6 +61,9 @@ nginx_sites: []
 nginx_enabled_sites: []
 nginx_disabled_sites: []
 
+# upstreams
+nginx_upstreams: []
+
 # source
 nginx_source_url: "http://nginx.org/download/nginx-{{nginx_source_version}}.tar.gz"
 nginx_source_prefix: "/usr/local/nginx/nginx-{{nginx_source_version}}"
@@ -68,7 +71,13 @@ nginx_source_conf_path: "{{nginx_dir}}/nginx.conf"
 nginx_source_sbin_path: "{{nginx_source_prefix}}/sbin/nginx"
 nginx_source_default_configure_flags: "--prefix={{nginx_source_prefix}} --conf-path={{nginx_source_conf_path}} --sbin-path={{nginx_source_sbin_path}}"
 
-nginx_source_modules_included:
+# Default list of modules to be compiled with nginx. To be used in role call
+# to easily override nginx_source_modules_included with:
+#    - role: ansible-role-nginx
+#      nginx_source_modules_included:
+#        http_echo_module: "{{ nginx_default_source_modules_included['http_echo_module'] }}"
+#        http_v2_module: "{{ nginx_default_source_modules_included['http_v2_module'] }}"
+nginx_default_source_modules_included:
   http_stub_status_module: "--with-http_stub_status_module"
   http_ssl_module: "--with-http_ssl_module"
   openssl: "--with-openssl=/tmp/openssl-{{ openssl_version }}"
@@ -78,13 +87,16 @@ nginx_source_modules_included:
   http_auth_request_module: "--add-module=/tmp/ngx_http_auth_request_module-{{nginx_auth_request_release}}"
   http_echo_module: "--add-module=/tmp/echo-nginx-module-{{nginx_echo_version}}"
   google_perftools_module: "--with-google_perftools_module"
-  ipv6_module: "--with-ipv6"
   http_real_ip_module: "--with-http_realip_module"
-  http_spdy_module: "--with-http_spdy_module"
+  http_v2_module: "--with-http_v2_module"
   http_perl_module: "--with-http_perl_module"
   naxsi_module: "--add-module=/tmp/naxsi-{{nginx_naxsi_version}}/naxsi_src"
   ngx_pagespeed: "--add-module=/tmp/ngx_pagespeed-release-{{nginx_ngx_pagespeed_version}}-beta"
   http_geoip_module: "--with-http_geoip_module"
+
+# List of modules to be compiled with nginx. See nginx_default_source_modules_included
+# on how to override this on role call.
+nginx_source_modules_included: "{{ nginx_default_source_modules_included }}"
 
 nginx_source_modules_excluded:
   - mail_pop3_module
@@ -142,7 +154,7 @@ nginx_upload_progress_url: "https://github.com/masterzen/nginx-upload-progress-m
 
 
 # headers_more_module configuration
-nginx_headers_more_version: "0.261"
+nginx_headers_more_version: "0.33"
 nginx_headers_more_url: "https://github.com/agentzh/headers-more-nginx-module/archive/v{{nginx_headers_more_version}}.tar.gz"
 
 
@@ -152,8 +164,8 @@ nginx_auth_request_url: "http://mdounin.ru/hg/ngx_http_auth_request_module/archi
 
 
 # http_echo_module configuration
-nginx_echo_version: "0.58"
-nginx_echo_url: "https://github.com/agentzh/echo-nginx-module/archive/v{{nginx_echo_version}}.tar.gz"
+nginx_echo_version: "0.61"
+nginx_echo_url: "https://github.com/openresty/echo-nginx-module/archive/v{{nginx_echo_version}}.tar.gz"
 
 
 # http_realip_module configuration
@@ -171,3 +183,14 @@ nginx_ngx_pagespeed_version: 1.9.32.4
 
 # OpenSSL configuration
 openssl_version: "1.0.2h"
+
+# Default headers to be installed on the `http` section of Nginx, effectively
+# enabled on all sites. This variable is a list of tuples where the first
+# element is the header name and the second is the header value.
+nginx_default_http_headers: "{{ nginx_secure_headers }}"
+
+# Security-related headers
+nginx_secure_headers:
+  - ['X-XSS-Protection', '1; mode=block']
+  - ['X-Content-Type-Options', 'nosniff']
+  - ['Strict-Transport-Security', 'max-age=31536000; includeSubDomains']

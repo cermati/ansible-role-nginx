@@ -28,4 +28,5 @@
     name: nginx
     state: started
   register: nginx_first_start
-  when: not nginx_config.stat.exists
+  # we will manage nginx from supervisor, so don't start nginx using systemctl / service or it will conflict
+  when: not nginx_config.stat.exists and not nginx_daemon_disable

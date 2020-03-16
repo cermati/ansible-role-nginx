@@ -30,9 +30,6 @@
 - include: modules/http_realip_module.yml
   when: nginx_source_modules_included.http_realip_module is defined
 
-- include: modules/http_spdy_module.yml
-  when: nginx_source_modules_included.http_spdy_module is defined
-
 - include: modules/naxsi_module.yml
   when: nginx_source_modules_included.naxsi_module is defined
 
@@ -41,3 +38,6 @@
 
 - include: modules/http_geoip_module.yml
   when: nginx_source_modules_included.http_geoip_module is defined
+
+- include: modules/http_v2_module.yml
+  when: nginx_source_modules_included.http_v2_module is defined

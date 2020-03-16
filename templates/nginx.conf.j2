@@ -21,6 +21,17 @@ events {
 }
 
 http {
+
+  map $ssl_client_s_dn $ssl_client_s_dn_cn {
+    default "";
+    ~CN=(?<CN>[^,]+) $CN;
+  }
+
+  map $ssl_client_s_dn $ssl_client_s_dn_ou {
+    default "";
+    ~OU=(?<OU>[^/]+) $OU;
+  }
+
 {% if nginx_install_method == "source" %}
 {% if nginx_source_modules_included.naxsi_module is defined %}
   include       {{nginx_dir}}/naxsi_core.rules;
@@ -29,6 +40,10 @@ http {
 
   include       {{nginx_dir}}/mime.types;
   default_type  application/octet-stream;
+
+{% for header in nginx_default_http_headers %}
+  add_header '{{ header[0] }}' '{{ header[1] }}';
+{% endfor %}
 
 {% if nginx_charset %}
   charset {{nginx_charset}};
@@ -39,7 +54,7 @@ http {
 {% else %}
 {% for log in nginx_access_logs %}
 {% if 'format' in log %}
-  log_format  {{log['name']}}  {{log['format']}};
+  log_format  {{log['name']}}  '{{log['format']}}';
 {% endif %}
   access_log    {{nginx_log_dir}}/{{log['filename']}} {{log['name']}}{% if 'options' in log and log['options']|lower != 'none' %} {{log['options']}}{% endif %};
 {% endfor %}
